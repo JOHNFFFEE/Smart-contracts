@@ -14,6 +14,7 @@ contract FractionalizedNFT is ERC20, Ownable, ERC20Permit, ERC721Holder {
     uint256 public tokenId;
     uint256 immutable public salePrice ;
     uint public ERC20_tokenAmount ;
+    bool fractionized = false ;
 
     event Fractionalized(
         address indexed onwer,
@@ -43,7 +44,8 @@ contract FractionalizedNFT is ERC20, Ownable, ERC20Permit, ERC721Holder {
         address indexed onwer,
         uint time
     );
-
+  
+  error AlreadyFractionalized();
   error NotEnoughEther();
   error NotNftOwner();
   error NotAllERC20Token();
@@ -62,13 +64,16 @@ contract FractionalizedNFT is ERC20, Ownable, ERC20Permit, ERC721Holder {
      * @dev Fractionalize the Nft into multiple ERC20 Tokens.
      * _amount of tokens to be divised 
      * approve nft before transfer
+     * run once - for 1 tokenId
      */
 
     function Fractionalize(uint _tokenId , uint _amount) external   {
         if (Nft.ownerOf(_tokenId) != msg.sender) revert NotNftOwner() ;
+        if (fractionized) revert AlreadyFractionalized();
         Nft.safeTransferFrom(msg.sender, address(this), _tokenId);
         tokenId = _tokenId;
         ERC20_tokenAmount = _amount ;
+        fractionized = true;
         // _mint(address(this), ERC20_tokenAmount);
 
         emit Fractionalized(msg.sender , tokenId , ERC20_tokenAmount);
