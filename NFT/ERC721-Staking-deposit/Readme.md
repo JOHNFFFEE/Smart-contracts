@@ -1,0 +1,1 @@
+This staking works only if we are depositing funds into the contract
