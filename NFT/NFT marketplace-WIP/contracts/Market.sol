@@ -92,7 +92,7 @@ function listToken( address _nftContract ,uint _tokenId ,  uint _price  ) extern
     _price
     );
 
-  IERC721(_nftContract).approve(address(this), _tokenId);
+ IERC721(_nftContract).approve(address(this), _tokenId);
     
   IERC721(_nftContract).transferFrom(msg.sender, address(this), _tokenId);
 
@@ -106,6 +106,7 @@ function listToken( address _nftContract ,uint _tokenId ,  uint _price  ) extern
     );
   }
 
+//insert modifier ?
 
 
   /* Creates the sale of a marketplace item */
@@ -118,6 +119,7 @@ function buyToken(uint itemId ) external payable nonReentrant  {
     require(msg.sender != idToMarketItem[itemId].seller, "Seller can not be the buyer");
     require(idToMarketItem[itemId].status == ListingStatus.Active, "Listing is not active" );
     require(msg.value >= price, "Please submit the asking price in order to complete the purchase");
+//add fee to market place below
     idToMarketItem[itemId].seller.transfer(msg.value);
 
     IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
@@ -219,13 +221,6 @@ function Cancel (uint itemId ) external nonReentrant  {
       }
     }
     return items;
-  }
-
-
-
-  function auction (uint itemId) {
-      
-
   }
 
 
