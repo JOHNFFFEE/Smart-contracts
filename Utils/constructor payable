@@ -1,0 +1,19 @@
+// to make every contract deployment payable
+//and to send money automatically at the deployment of the sc we should like that
+
+
+1. make the constructor payable
+2. insert parameters into the constructors
+3. do the payment
+
+    constructor(
+   
+       address serviceFeeReceiver_,
+       uint256 serviceFee_
+    ) payable { 
+ 
+        payable(serviceFeeReceiver_).transfer(serviceFee_);
+    }
+
+
+
