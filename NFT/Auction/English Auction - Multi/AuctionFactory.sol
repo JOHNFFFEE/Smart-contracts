@@ -42,21 +42,19 @@ import './EnglishAuction.sol';
 
 
 
-
-
     function createAuction(uint _tokenId, uint _startingBid, uint _startTime, uint _endTime) external onlyOwner {
           _tokenIdCounter.increment();
            uint256 tokenId = _tokenIdCounter.current();
          
-   auction[tokenId] = Auctions(
-          _tokenId,
-          _startingBid,
-          _startingBid, //_startingBid = highestBid
-          msg.sender,
-          _startTime,
-          _endTime,
-          State.Declared
-        );  
+        auction[tokenId] = Auctions(
+                _tokenId,
+                _startingBid,
+                _startingBid, //_startingBid = highestBid
+                msg.sender,
+                _startTime,
+                _endTime,
+                State.Declared
+                );  
     }
     
     
@@ -65,12 +63,12 @@ import './EnglishAuction.sol';
      * can't start if not contract owner neither the auction has not ended
         started = true;
      */
-  function AuctionStart(uint itemId) external onlyOwner {
-      if (auction[itemId].auctionState != State.Declared) revert AuctionInProcess();
+    function AuctionStart(uint itemId) external onlyOwner {
+        if (auction[itemId].auctionState != State.Declared) revert AuctionInProcess();
         uint tokenId = auction[itemId].token ;
         nftCollection.transferFrom(msg.sender, address(this), tokenId);
         auction[itemId].auctionState = State.Running ;
-        // auction[itemId].endTime = uint32(block.timestamp) + auctionTime;
+
         emit Start(itemId , tokenId , block.timestamp );
     }
 
@@ -103,8 +101,7 @@ import './EnglishAuction.sol';
 
 
     
-       function AuctionEnd(uint itemId) external onlyOwner {
-           
+    function AuctionEnd(uint itemId) external onlyOwner {           
         uint end = auction[itemId].endTime ;
         uint tokenId = auction[itemId].token ;
         address highestBidder = auction[itemId].highestBidder ;
@@ -165,33 +162,33 @@ import './EnglishAuction.sol';
   /* Returns all sold market items */
     function getSoldNfts() public view returns (Auctions[] memory) {
    // uint itemCount = _tokenIdCounter.current();
-    uint soldItemCount = _soldCounter.current();
-    uint currentIndex = 0;
+        uint soldItemCount = _soldCounter.current();
+        uint currentIndex = 0;
 
-    Auctions[] memory items = new Auctions[](soldItemCount);
-    for (uint i = 0; i <= soldItemCount; i++) {
-        if (auction[i+1].auctionState == State.Ended) {
-            uint currentId = i + 1;
-            Auctions storage currentItem = auction[currentId];
-            items[currentIndex] = currentItem;
-            currentIndex += 1;
+        Auctions[] memory items = new Auctions[](soldItemCount);
+        for (uint i = 0; i <= soldItemCount; i++) {
+            if (auction[i+1].auctionState == State.Ended) {
+                uint currentId = i + 1;
+                Auctions storage currentItem = auction[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
         }
-    }
 
-    return items;
-}
+        return items;
+    }
 
 
 
   /* Returns all sold market items */
     function getOpenNfts() public view returns (Auctions[] memory) {
     uint itemCount = _tokenIdCounter.current();
-    //uint unsoldItemCountitemCount = _tokenIdCounter.current() -  _soldCounter.current();
+    uint unsoldItemCountitemCount = _tokenIdCounter.current() -  _soldCounter.current();
     uint currentIndex = 0;
 
-    Auctions[] memory items = new Auctions[](itemCount);
+    Auctions[] memory items = new Auctions[](unsoldItemCountitemCount);
     for (uint i = 0; i <= itemCount; i++) {
-        if (auction[i+1].highestBidder == owner()) {
+        if (auction[i+1].auctionState == State.Running) {
             uint currentId = i + 1;
             Auctions storage currentItem = auction[currentId];
             items[currentIndex] = currentItem;
@@ -199,17 +196,13 @@ import './EnglishAuction.sol';
         }
     }
 
-    return items;
-}
-
-
+        return items;
+    }
 
 
     function now() view public returns (uint time){
         return  block.timestamp;
     }
-
-
 
 
 }
