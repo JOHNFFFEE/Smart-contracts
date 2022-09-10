@@ -1,5 +1,7 @@
-Contracts to put in English auction several tokenIds of the same collection.
-You can set the starting time, ending time, minimum bidding
+This is a complementary contract for users willing to create an English auction to their collection.
+  
+    *  You can set the starting time, ending time, minimum bidding
+
 
 
 

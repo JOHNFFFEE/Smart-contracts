@@ -4,8 +4,6 @@
 pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import './EnglishAuction.sol';
-// import "@openzeppelin/contracts/access/Ownable.sol";
-//import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
    contract AuctionFactory is EnglishAuction     {
         using Counters for Counters.Counter;
@@ -33,14 +31,13 @@ import './EnglishAuction.sol';
 
     IERC721 immutable nftCollection ;
 
-    mapping (uint => Auctions) public auction ;
+    mapping (uint => Auctions) private auction ;
 
 
     // event AuctionCreated(address auctionContract, address owner, uint numAuctions, address[] allAuctions);
 
      constructor(  IERC721 _nftCollection ) {
         nftCollection = _nftCollection ;
-         seller = payable(msg.sender);
         }
 
 
