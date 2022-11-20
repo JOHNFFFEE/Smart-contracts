@@ -37,6 +37,7 @@ contract contractName is ERC721A, Ownable, ReentrancyGuard {
 
 
   modifier mintCompliance(uint256 _mintAmount) {
+      require(msg.sender == tx.origin, "no smart contracts");
     if (_mintAmount < 0 || _mintAmount > maxMintAmountPerTx) revert InvalidMintAmount();
     if (totalSupply() + _mintAmount > maxSupply) revert MaxSupply();
     _;
