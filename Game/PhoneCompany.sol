@@ -28,6 +28,8 @@ contract P2EGame is Ownable, IERC721Receiver  {
     enum Status {
         Open,
         Full,
+        Start,
+        End,
         Close
     }
 
@@ -61,12 +63,15 @@ contract P2EGame is Ownable, IERC721Receiver  {
       
         _roomIds.increment();
         uint256 itemId = _roomIds.current();
+        bool roomPayable ;
 
         nftContract.transferFrom(msg.sender, address(this), _tokenId1) ;
-        bool roomPayable = false;
+       
         if (fees>0){
             require(msg.value>=fee, 'Not enough fees');
             roomPayable= true;
+        }else{
+             roomPayable = false;
         } 
 
         gamePlay[itemId] = Game(
@@ -89,7 +94,7 @@ contract P2EGame is Ownable, IERC721Receiver  {
      require(gamePlay[roomId].roomStatus == Status.Open, 'Game not open' );
      require(msg.sender !=  gamePlay[roomId].player1, 'Cant play against yourself');
 
-     if (gamePlay[roomId].roomPayable ==true)
+     if (gamePlay[roomId].roomPayable == true)
      require(msg.value>=gamePlay[roomId].fees, 'Not enough fees');
 
      nftContract.transferFrom(msg.sender, address(this), _tokenId2) ;
@@ -100,18 +105,38 @@ contract P2EGame is Ownable, IERC721Receiver  {
 
      emit RoomJoined(roomId,  msg.sender,  true);
     }
+   
+   //start Game from dapp
+    function setStartGame (uint roomId) public  onlyOwner {
+        gamePlay[roomId].roomStatus = Status.Start ; 
+    }
+
 
    //set Winner from dapp
     function setWinnerLooser (uint roomId, address winner) public  onlyOwner {
+        gamePlay[roomId].roomStatus = Status.End ;
         gamePlay[roomId].winner = payable(winner) ;
         _gameClosed.increment();
+    }
+
+// if 1 player is only registered, and want to cancel
+    function cancelGame(uint roomId) public {
+     require(gamePlay[roomId].roomStatus == Status.Open  ,  'Second player has already registered' );
+     require(msg.sender == gamePlay[roomId].player1, 'Not player');
+
+     gamePlay[roomId].roomStatus = Status.Close ;
+     _gameClosed.increment();
+
+     nftContract.safeTransferFrom(address(this),msg.sender ,   gamePlay[roomId].tokenId1) ;
+     payable(owner()).transfer(gamePlay[roomId].fees);  
+
     }
 
 
     function Withdraw(uint roomId) public  {
         //require not free game
         require(msg.sender == gamePlay[roomId].player1 || msg.sender == gamePlay[roomId].player2, 'Not played for room');
-        require(gamePlay[roomId].roomStatus == Status.Full || gamePlay[roomId].roomStatus == Status.Open  ,  'Not right game' );
+        require(gamePlay[roomId].roomStatus == Status.End  ,  'Not right game' );
    
         address winner = gamePlay[roomId].winner ;
         if (msg.sender == gamePlay[roomId].player1){
@@ -131,8 +156,11 @@ contract P2EGame is Ownable, IERC721Receiver  {
           payable(winner).transfer(gamePlay[roomId].fees*(1-ownerFees));
         }
 
-        if (gamePlay[roomId].player1 ==  address(0) && gamePlay[roomId].player2 ==  address(0))
-        gamePlay[roomId].roomStatus == Status.Close ;     
+        if (gamePlay[roomId].player1 ==  address(0) && gamePlay[roomId].player2 ==  address(0)){
+            gamePlay[roomId].roomStatus = Status.Close ;    
+            // delete gamePlay[roomId] ; 
+        }
+       
     }
 
 
@@ -176,7 +204,7 @@ contract P2EGame is Ownable, IERC721Receiver  {
     }
 
 
-      function withdraw() public onlyOwner {
+      function ownerWithdrawal() public onlyOwner {
     // =============================================================================
     (bool os, ) = payable(owner()).call{value: address(this).balance}('');
     require(os);
