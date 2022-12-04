@@ -22,7 +22,9 @@ contract P2EGame is Ownable, IERC721Receiver  {
 
 
     //fees for participating the game
-     uint public fees =10 ;
+     uint256 public fees = 0.05 ether ;
+     // owner fee in %
+     uint256 public ownerfee = 10;
 
 
     enum Status {
@@ -40,7 +42,7 @@ contract P2EGame is Ownable, IERC721Receiver  {
         address player2;
         uint tokenId1 ;
         uint  tokenId2;
-        uint fees ; 
+        uint256 fees ; 
         bool roomPayable ;
         Status roomStatus ;
         address payable winner;
@@ -58,7 +60,7 @@ contract P2EGame is Ownable, IERC721Receiver  {
     // 1 function payable other 1 will be for free game
     //for 1st player 2nd player is joining via joining function
     function createGamePayable (
-        uint _tokenId1, uint fee 
+        uint _tokenId1, uint256 fee 
     ) payable external {
       
         _roomIds.increment();
@@ -67,8 +69,8 @@ contract P2EGame is Ownable, IERC721Receiver  {
 
         nftContract.transferFrom(msg.sender, address(this), _tokenId1) ;
        
-        if (fees>0){
-            require(msg.value>=fee, 'Not enough fees');
+        if (fee>0){
+            require(fee >= fees, 'Not enough fees');
             roomPayable= true;
         }else{
              roomPayable = false;
@@ -111,6 +113,10 @@ contract P2EGame is Ownable, IERC721Receiver  {
         gamePlay[roomId].roomStatus = Status.Start ; 
     }
 
+        function changeownerfee (uint256 _newfee) public  onlyOwner {
+        ownerfee = _newfee;
+    }
+
 
    //set Winner from dapp
     function setWinnerLooser (uint roomId, address winner) public  onlyOwner {
@@ -148,15 +154,17 @@ contract P2EGame is Ownable, IERC721Receiver  {
             nftContract.safeTransferFrom(address(this),msg.sender ,   gamePlay[roomId].tokenId2) ;             
         }
 
-        uint ownerFees = fees/100 ;
+        uint ownerFees = gamePlay[roomId].fees * ownerfee / 100 ;
+        uint prize = gamePlay[roomId].fees - ownerFees;
         if (msg.sender == winner && gamePlay[roomId].roomPayable ==true) {
 
-          payable(owner()).transfer(gamePlay[roomId].fees*ownerFees);
+          payable(owner()).transfer(ownerFees);
           //transfer to winner
-          payable(winner).transfer(gamePlay[roomId].fees*(1-ownerFees));
+          payable(winner).transfer(prize);
         }
 
         if (gamePlay[roomId].player1 ==  address(0) && gamePlay[roomId].player2 ==  address(0)){
+            gamePlay[roomId].fees = 0;
             gamePlay[roomId].roomStatus = Status.Close ;    
             // delete gamePlay[roomId] ; 
         }
