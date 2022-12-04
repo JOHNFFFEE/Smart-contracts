@@ -69,7 +69,7 @@ contract P2EGame is Ownable, IERC721Receiver  {
 
         nftContract.transferFrom(msg.sender, address(this), _tokenId1) ;
        
-        if (fee>0){
+        if (fee > 0){
             require(fee >= fees, 'Not enough fees');
             roomPayable= true;
         }else{
@@ -134,7 +134,7 @@ contract P2EGame is Ownable, IERC721Receiver  {
      _gameClosed.increment();
 
      nftContract.safeTransferFrom(address(this),msg.sender ,   gamePlay[roomId].tokenId1) ;
-     payable(owner()).transfer(gamePlay[roomId].fees);  
+     payable(msg.sender).transfer(gamePlay[roomId].fees);  
 
     }
 
