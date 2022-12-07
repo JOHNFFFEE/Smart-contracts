@@ -1,4 +1,4 @@
-interface IERC5643 {
+    interface IERC5643 {
     /// @notice Emitted when a subscription expiration changes
     /// @dev When a subscription is canceled, the expiration value should also be 0.
     event SubscriptionUpdate(uint256 indexed tokenId, uint64 expiration);
