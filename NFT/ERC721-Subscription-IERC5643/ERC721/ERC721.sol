@@ -10,8 +10,7 @@ contract Modified_ERC5643 is ERC721, IERC5643, Ownable {
     mapping(uint256 => uint64) private _subscriptions;
 
     uint64 expir = uint64(now() +50) ;
-    uint cost = 0.5 ether ;
-    
+    uint cost = 0.5 ether ;   
      
 
     constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) {}
