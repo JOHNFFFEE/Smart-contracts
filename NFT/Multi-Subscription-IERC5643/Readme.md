@@ -6,4 +6,4 @@ Subscription NFTs allow businesses to build communities of their most loyal cust
 
 
 
-Seems that ERC155 is lower in gas than ERC1155D
+**Seems that ERC155 is lower in gas than ERC1155D
