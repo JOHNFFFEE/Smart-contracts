@@ -123,7 +123,7 @@ contract LaunchiPass is ERC1155,  Ownable,  IERC5643 {
 
     //view 
 
-    function expiresAt(uint256 _tokenId, address _user) external view returns(uint64) {
+    function expiresAt(uint256 _tokenId, address _user) public view returns(uint64) {
         return   _subscriptionsbyAddress[_tokenId][_user].expr;
     }
 
@@ -133,9 +133,28 @@ contract LaunchiPass is ERC1155,  Ownable,  IERC5643 {
 
     function isExpired(uint256 _tokenId , address _user) external view returns(bool expired) {
         if  (  _subscriptionsbyAddress[_tokenId][_user].expr<= block.timestamp )
-        return true;
+            return true;
 
     }
+
+    //check if user have a valid pass
+    //flag to know if still valid
+    // time to get the maximum expiration if user has number of pass
+    function checkUserPassIsValid(address _user) public view returns (bool valid , uint maxPassTime) {
+        bool flag = false ;
+        uint time =0 ;
+        for (uint256 i=0; i<= passId._value ; i++){
+            uint expired = expiresAt(i , _user);
+            if (expired >0){
+                flag = true; 
+                if (expired>time){
+                    time = expired ;
+                }
+            }
+        }
+    return  (flag,time );  
+    }
+
 
       //internal
     function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
