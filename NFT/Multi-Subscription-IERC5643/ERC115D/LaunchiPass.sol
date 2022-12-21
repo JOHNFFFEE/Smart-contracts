@@ -145,7 +145,7 @@ contract LaunchiPass is ERC1155,  Ownable,  IERC5643 {
         uint time =0 ;
         for (uint256 i=0; i<= passId._value ; i++){
             uint expired = expiresAt(i , _user);
-            if (expired >0){
+            if (expired >block.timestamp){
                 flag = true; 
                 if (expired>time){
                     time = expired ;
