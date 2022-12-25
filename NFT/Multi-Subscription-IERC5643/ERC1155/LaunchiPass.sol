@@ -10,6 +10,7 @@ pragma solidity ^0.8.10;
 /// @dev Contract under development to enable floating point
 
 
+
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
@@ -32,6 +33,9 @@ contract LaunchiPass is ERC1155,  Ownable, ERC1155Supply, IERC5643 {
 
 //Contain all the passes
     mapping(uint256 => Passes) public Pass;
+// to minimize the drawback
+// toknNumber => tokenId => address
+    mapping (address => mapping( uint => uint)) public SoleTokenIdPerUser;
 
 // 1 week  604800 
 // 6 months 15778800
@@ -52,13 +56,17 @@ contract LaunchiPass is ERC1155,  Ownable, ERC1155Supply, IERC5643 {
     }
 
     /// @notice mint and generate Pass
+    /// @dev only 1 pass of each type is available for users
     /// @param id tokenId
-    function mint(uint256 id )
+    function mint(address _user, uint256 id )
         public payable 
     {           
-        require(msg.sender == tx.origin, "no smart contracts");             
-        _mint(msg.sender, id, 1, " ");
-         renewSubscription(id);
+        require(msg.sender == tx.origin, "No smart contracts");  
+        require(totalSupply(id)<= Pass[id].amount , "No more Pass Available" ); 
+        require(SoleTokenIdPerUser[msg.sender][id]<1, "1 pass of type available per user" );
+        SoleTokenIdPerUser[msg.sender][id]++ ;  
+        _mint(_user, id, 1, " ");
+        renewSubscription(_user, id);
     } 
 
 
@@ -80,14 +88,15 @@ contract LaunchiPass is ERC1155,  Ownable, ERC1155Supply, IERC5643 {
     }
  
  /// @notice create a Pass subscription
-    function renewSubscription(uint tokenId) public payable {      
+    function renewSubscription(address _user, uint256 tokenId) public payable { 
+        if (msg.sender != owner()){     
         require(msg.value>= Pass[tokenId].price, 'Not Enough Funds');
-        require(totalSupply(tokenId)<= Pass[tokenId].amount , 'No Pass Available' );
-        _subscriptionsbyAddress[tokenId][msg.sender].expr = uint64(block.timestamp) + Pass[tokenId].expr;
+        }
+        _subscriptionsbyAddress[tokenId][_user].expr = uint64(block.timestamp) + Pass[tokenId].expr;
         emit SubscriptionUpdate(tokenId);
     }
 
- //onlyOnwer
+    //onlyOwner
     function cancelSubscription(uint256 _tokenId , address _user) external onlyOwner {
         delete  _subscriptionsbyAddress[_tokenId][_user] ;
         emit SubscriptionUpdate(_tokenId);
@@ -98,7 +107,6 @@ contract LaunchiPass is ERC1155,  Ownable, ERC1155Supply, IERC5643 {
         Pass[_tokenId].amount = _newAmount ;
         Pass[_tokenId].price = _newPrice ;
         Pass[_tokenId].expr = _expr ;
-
     }
 
     function setURI(string memory newuri) public onlyOwner {
@@ -113,10 +121,9 @@ contract LaunchiPass is ERC1155,  Ownable, ERC1155Supply, IERC5643 {
     
     }
 
-
     //view 
 
-    function expiresAt(uint256 _tokenId, address _user) external view returns(uint64) {
+    function expiresAt(uint256 _tokenId, address _user) public view returns(uint64) {
         return   _subscriptionsbyAddress[_tokenId][_user].expr;
     }
 
@@ -130,6 +137,24 @@ contract LaunchiPass is ERC1155,  Ownable, ERC1155Supply, IERC5643 {
 
     }
 
+//      //check if user have a valid pass
+//     //flag to know if still valid
+//     // time to get the maximum expiration if user has number of pass
+    function checkUserPassIsValid(address _user) public view returns (bool valid , uint maxPassTime) {
+        bool flag = false ;
+        uint time =0 ;
+        for (uint256 i=0; i<= passId._value ; i++){
+            uint expired = expiresAt(i , _user);
+         if (expired >block.timestamp && balanceOf(_user, i)>0){
+              flag = true; 
+        if (expired>time){
+            time = expired ;
+            }
+         }
+        }
+        return  (flag,time );  
+    }
+
       //internal
     function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
         internal
@@ -139,7 +164,19 @@ contract LaunchiPass is ERC1155,  Ownable, ERC1155Supply, IERC5643 {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
+    //update the subscription for new user
+    function _afterTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
+        internal
+        override(ERC1155)
+    {
+        super._afterTokenTransfer(operator, from, to, ids, amounts, data);
+        if(from != address(0) && to != address(0)){
+            for (uint i; i < amounts.length;  i++){
+                _subscriptionsbyAddress[ids[i]][to].expr = _subscriptionsbyAddress[ids[i]][from].expr ;
+            }
 
-
+        
+        }
+    }
 }
 
