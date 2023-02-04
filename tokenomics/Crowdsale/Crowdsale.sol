@@ -1,11 +1,15 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
-
-import"@openzeppelin/contracts/utils/math/SafeMath.sol";
-import"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+pragma solidity ^0.8.17;
 
 
-contract Crowdsale{
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+
+abstract contract Crowdsale is Context, ReentrancyGuard{
     
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -21,11 +25,8 @@ contract Crowdsale{
     uint256 public _rate;
 
     // Amount of wei raised
-    uint256 private _weiRaised;
-    
-    
-    uint256 public openingTime;
-    uint256 public closingTime;
+    uint256 private _weiRaised;   
+   
 
     /**
      * Event for token purchase logging
@@ -36,19 +37,15 @@ contract Crowdsale{
      */
     event TokensPurchased(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
-    constructor (uint256 rate, address payable wallet, IERC20 token, uint256 _openingTime, uint256 _closingTime)  {
+    constructor (uint256 rate, address payable wallet, IERC20 token)  {
         require(rate > 0, "Crowdsale: rate is 0");
         require(wallet != address(0), "Crowdsale: wallet is the zero address");
         require(address(token) != address(0), "Crowdsale: token is the zero address");
-        require(_openingTime >= block.timestamp, "time is greater than opening time");
-        require(_closingTime >= _openingTime, "closingTime should be lesss than openingtime");
-
-
+   
         _rate = rate;
         _wallet = wallet;
         _token = token;
-        openingTime = _openingTime;
-        closingTime = _closingTime;
+      
     }
 
  
@@ -88,13 +85,9 @@ contract Crowdsale{
         return _weiRaised;
     }
 
-     modifier onlyWhileOpen {
-    // solium-disable-next-line security/no-block-members
-    require(block.timestamp >= openingTime && block.timestamp <= closingTime, "crowdsale is closed");
-    _;
-     }
+ 
 
-    function buyTokens(address beneficiary) public payable {
+    function buyTokens(address beneficiary) virtual public payable {
         uint256 weiAmount = msg.value;
  
         _preValidatePurchase(beneficiary, weiAmount);
@@ -118,7 +111,7 @@ contract Crowdsale{
      * @param beneficiary Address performing the token purchase
      * @param weiAmount Value in wei involved in the purchase
      */
-    function _preValidatePurchase(address beneficiary, uint256 weiAmount) internal virtual onlyWhileOpen {
+    function _preValidatePurchase(address beneficiary, uint256 weiAmount) internal virtual  {
         require(beneficiary != address(0), "Crowdsale: beneficiary is the zero address");
         require(weiAmount != 0, "Crowdsale: weiAmount is 0");
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
@@ -130,7 +123,7 @@ contract Crowdsale{
      * @param beneficiary Address performing the token purchase
      * @param weiAmount Value in wei involved in the purchase
      */
-    function _postValidatePurchase(address beneficiary, uint256 weiAmount) internal view {
+    function _postValidatePurchase(address beneficiary, uint256 weiAmount) internal virtual view {
         // solhint-disable-previous-line no-empty-blocks
     }
 
@@ -140,7 +133,7 @@ contract Crowdsale{
      * @param beneficiary Address performing the token purchase
      * @param tokenAmount Number of tokens to be emitted
      */
-    function _deliverTokens(address beneficiary, uint256 tokenAmount) internal {
+    function _deliverTokens(address beneficiary, uint256 tokenAmount) internal virtual {
         _token.safeTransfer(beneficiary, tokenAmount);
     }
 
@@ -150,7 +143,7 @@ contract Crowdsale{
      * @param beneficiary Address receiving the tokens
      * @param tokenAmount Number of tokens to be purchased
      */
-    function _processPurchase(address beneficiary, uint256 tokenAmount) internal {
+    function _processPurchase(address beneficiary, uint256 tokenAmount) internal virtual {
         _deliverTokens(beneficiary, tokenAmount);
     }
 
@@ -160,7 +153,7 @@ contract Crowdsale{
      * @param beneficiary Address receiving the tokens
      * @param weiAmount Value in wei involved in the purchase
      */
-    function _updatePurchasingState(address beneficiary, uint256 weiAmount) internal {
+    function _updatePurchasingState(address beneficiary, uint256 weiAmount) internal virtual {
         // solhint-disable-previous-line no-empty-blocks
     }
 
@@ -169,7 +162,7 @@ contract Crowdsale{
      * @param weiAmount Value in wei to be converted into tokens
      * @return Number of tokens that can be purchased with the specified _weiAmount
      */
-    function _getTokenAmount(uint256 weiAmount) internal view returns (uint256) {
+    function _getTokenAmount(uint256 weiAmount) internal virtual view returns (uint256) {
         return weiAmount.mul(_rate); 
     }
 
