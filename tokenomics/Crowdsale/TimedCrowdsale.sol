@@ -20,7 +20,8 @@ import"@openzeppelin/contracts/utils/math/SafeMath.sol";
    */
   modifier onlyWhileOpen {
     // solium-disable-next-line security/no-block-members
-    require(block.timestamp >= openingTime && block.timestamp <= closingTime);
+    require(block.timestamp >= openingTime, 'Sales not opened yet');
+    require(block.timestamp <= closingTime, 'Sales already closed');
     _;
   }
 
@@ -31,8 +32,8 @@ import"@openzeppelin/contracts/utils/math/SafeMath.sol";
    */
   constructor(uint256 _openingTime, uint256 _closingTime)  {
     // solium-disable-next-line security/no-block-members
-    require(_openingTime >= block.timestamp);
-    require(_closingTime >= _openingTime);
+    require(_openingTime >= block.timestamp, 'Sales Not opened yet');
+    require(_closingTime >= _openingTime, 'closingTime should be bigger than openingTime');
 
     openingTime = _openingTime;
     closingTime = _closingTime;
