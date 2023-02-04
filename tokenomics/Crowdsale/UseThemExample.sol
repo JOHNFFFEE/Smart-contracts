@@ -20,3 +20,7 @@ pragma solidity >=0.8.13 <0.9.0;
  
  }
  
+ // The contract erc20 should be deployed and be mintable and mint onlyowner
+ // rate  - number of token*18 per wei
+ //wallet - who should receive the founds
+ 
