@@ -1,16 +1,15 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.17;
 
-
-import"@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./Crowdsale.sol";
+import"@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 
 /**
  * @title TimedCrowdsale
  * @dev Crowdsale accepting contributions only within a time frame.
  */
-contract TimedCrowdsale is Crowdsale {
+ abstract contract TimedCrowdsale is Context, Crowdsale {
   using SafeMath for uint256;
 
   uint256 public openingTime;
@@ -30,7 +29,7 @@ contract TimedCrowdsale is Crowdsale {
    * @param _openingTime Crowdsale opening time
    * @param _closingTime Crowdsale closing time
    */
-  constructor(uint256 _openingTime, uint256 _closingTime) public {
+  constructor(uint256 _openingTime, uint256 _closingTime)  {
     // solium-disable-next-line security/no-block-members
     require(_openingTime >= block.timestamp);
     require(_closingTime >= _openingTime);
@@ -53,11 +52,11 @@ contract TimedCrowdsale is Crowdsale {
    * @param _beneficiary Token purchaser
    * @param _weiAmount Amount of wei contributed
    */
-  function _preValidatePurchase(
+  function _preValidatePurchase (
     address _beneficiary,
     uint256 _weiAmount
   )
-    internal
+    internal override virtual 
     onlyWhileOpen
   {
     super._preValidatePurchase(_beneficiary, _weiAmount);
