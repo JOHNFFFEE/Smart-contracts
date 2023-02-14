@@ -1,4 +1,4 @@
-  // SPDX-License-Identifier: MIT
+    // SPDX-License-Identifier: MIT
 
 
     //   __         ______     __  __     __   __     ______     __  __     __     ______   __    
@@ -9,7 +9,6 @@
 
     pragma solidity >=0.8.4 <0.9.0;
 
-import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@charged-particles/peppermint/contracts/ERC721PreMint.sol";
@@ -19,7 +18,6 @@ import "@charged-particles/peppermint/contracts/ERC721PreMint.sol";
 contract PeppermintRorschach is ERC721PreMint, ReentrancyGuard {
 
   using Strings for uint256;
-  // using Address for address payable;
   using Counters for Counters.Counter;
 
   /// @dev Some sales-related events
@@ -69,20 +67,6 @@ contract PeppermintRorschach is ERC721PreMint, ReentrancyGuard {
     _setApprovalForAll(_msgSender(), address(this), true);
       }
 
-  // constructor(
-  //   string memory name,
-  //   string memory symbol,
-  //   string memory baseUri,
-  //   uint256 maxSupply
-  // )
-  //   ERC721PreMint(name, symbol, _msgSender(), maxSupply)
-  // {
-  //   _baseTokenURI = baseUri;
-
-  //   // Since we pre-mint to "owner", allow this contract to transfer on behalf of "owner" for sales.
-  //   _setApprovalForAll(_msgSender(), address(this), true);
-  // }
-
 
   /// @dev Let's Pre-Mint a Gazillion NFTs!!  (wait, 2^^256-1 equals what again?)
   //1st nft remained to owner
@@ -91,8 +75,6 @@ contract PeppermintRorschach is ERC721PreMint, ReentrancyGuard {
     preminted = true ;
     _preMint();
   }
-
-
 
     modifier mintCompliance(uint256 _mintAmount) {
             if (msg.sender != tx.origin) revert NoSmartContract();
@@ -118,10 +100,6 @@ contract PeppermintRorschach is ERC721PreMint, ReentrancyGuard {
     amountTransferred = _batchTransfer(owner(), _msgSender(), tokenIds);
     emit Purchase(_msgSender(), amountTransferred, _tokenIdCounter.current());
 
-    // // Refund overspend
-    // if (msg.value > cost) {
-    //   payable(_msgSender()).sendValue(msg.value - cost);
-    // }
   }
 
 
@@ -167,14 +145,14 @@ contract PeppermintRorschach is ERC721PreMint, ReentrancyGuard {
 
   /// @dev pause/unpause minting
     function pause() public onlyOwner {
-        paused = !paused;
+      paused = !paused;
     } 
 
-          /// @dev return currentSupply of tokens
-        ///@return current supply 
-        function currentSupply() public view returns (uint256){
-            return _tokenIdCounter.current();
-        }
+  /// @dev return currentSupply of tokens
+  ///@return current supply 
+    function currentSupply() public view returns (uint256){
+      return _tokenIdCounter.current();
+    }
 
 
   //
@@ -243,23 +221,4 @@ contract PeppermintRorschach is ERC721PreMint, ReentrancyGuard {
         (bool owner, ) = payable(owner()).call{value: address(this).balance}('');
         require(owner);    
     }
-
-  // Curious...
-  /// @dev Very curious...
-//   function burn(uint256 tokenId) external virtual {
-//     _burn(tokenId);
-//     uint256 burns = _burns[tokenId];
-//     uint256 index = _tokenIdCounter.current();
-//     if (index < _maxSupply && burns < 3) {
-//       _tokenIdCounter.increment();
-//       uint256 newTokenId = _tokenIdCounter.current();
-//       _burns[newTokenId] = burns + 1;
-//       _transfer(owner(), _msgSender(), tokenId);
-//     }
-//   }
-//   function getBurns(uint256 tokenId) external view returns (uint256) {
-//     return _burns[tokenId];
-//   }
-
-
 }
