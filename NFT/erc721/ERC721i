@@ -122,7 +122,13 @@ contract PeppermintRorschach is ERC721PreMint, ReentrancyGuard {
   /// @dev extension URI like 'json'
   function setExtensionURL(string memory uri) public onlyOwner{
       ExtensionURL = uri;
-  }  
+  } 
+  
+  /// @dev set URI
+  function setbaseURL(string memory uri) public onlyOwner{
+      baseURL = uri;
+  }
+
 
   /// @dev only owner
   /// @param perTx  new max mint per transaction
