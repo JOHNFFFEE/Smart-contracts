@@ -57,6 +57,82 @@ const contract = new ethers.Contract(
         }
       }
     }
+    
+    
+    
+    
+    
+    
+    //and to see the images in js
+    
+    
+    //another contract connecting
+  const contract = new ethers.Contract(
+    myData.connector,
+    connectorJson,
+    data.Signer
+  );
+
+//erc721contract 
+  const contractColors = new ethers.Contract(
+    myData.Colour_Cards,
+    colorsJson,
+    data.Signer
+  );
+
+  const [nfts, setNFTs] = useState([]);
+
+  useEffect(() => {
+    async function getNFTs() {
+      if (window.ethereum) {
+        try {
+          const totalSupply = await contract.walletOfOwnerColors(data.Accounts);
+          console.log(totalSupply.toString());
+          const nftPromises = [];
+
+          ///limit to 50 shows and userLength
+          for (let j = 0; j < totalSupply.length && j < 50; j++) {
+            const supply = totalSupply[j].toString();
+
+            console.log(supply);
+            const tokenURI = await contractColors.tokenURI(supply.toString());
+            console.log(tokenURI);
+            nftPromises.push({ id: supply, tokenURI });
+            console.log(nftPromises);
+          }
+
+          //////////////////
+
+          for (let i = 0; i < nftPromises.length; i++) {
+            const token = nftPromises[i];
+            const metadataRes = await fetch(
+              `https://ipfs.io/ipfs/${token.tokenURI.substr(7)}`
+            );
+            const metadata = await metadataRes.json();
+            token.metadata = metadata;
+            token.image = await fetch(
+              `https://ipfs.io/ipfs/${token.metadata.image.substr(7)}`
+            );
+            console.log(token);
+          }
+
+          const nfts = nftPromises.map((token) => {
+            return {
+              id: token.id,
+              image: token.image.url,
+            };
+          });
+          setNFTs(nfts);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+
+    getNFTs();
+  }, []);
+
+    
 
     getNFTs();
   }, []);
