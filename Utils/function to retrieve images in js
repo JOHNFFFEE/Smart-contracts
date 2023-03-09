@@ -1,0 +1,62 @@
+const contract = new ethers.Contract(
+    myData.Colour_Cards,
+    colorJson,
+    data.Signer
+  );
+
+  const [nfts, setNFTs] = useState([]);
+
+  useEffect(() => {
+    async function getNFTs() {
+      if (window.ethereum) {
+        try {
+          const totalSupply = await contract.totalSupply();
+          console.log(totalSupply.toString());
+          const nftPromises = [];
+
+          ///
+
+          for (const tokenId of Array.from(
+            { length: totalSupply.toString() },
+            (_, i) => i
+          )) {
+            const ownerOf = await contract.ownerOf(tokenId);
+            console.log(ownerOf);
+            if (data.Accounts == ownerOf) {
+              const tokenURI = await contract.tokenURI(tokenId);
+              console.log(tokenURI);
+              nftPromises.push({ id: tokenId, tokenURI });
+              console.log(nftPromises);
+            }
+          }
+
+          //////////////////
+
+          for (let i = 0; i < nftPromises.length; i++) {
+            const token = nftPromises[i];
+            const metadataRes = await fetch(
+              `https://ipfs.io/ipfs/${token.tokenURI.substr(7)}`
+            );
+            const metadata = await metadataRes.json();
+            token.metadata = metadata;
+            token.image = await fetch(
+              `https://ipfs.io/ipfs/${token.metadata.image.substr(7)}`
+            );
+            console.log(token);
+          }
+
+          const nfts = nftPromises.map((token) => {
+            return {
+              id: token.id,
+              image: token.image.url,
+            };
+          });
+          setNFTs(nfts);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+
+    getNFTs();
+  }, []);
