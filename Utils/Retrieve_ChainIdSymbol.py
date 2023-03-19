@@ -9,19 +9,23 @@ response = requests.get(url)
 df = pd.read_json(response.content)
 
 # Select only the columns for name, chainId, and nativeCurrency
-df = df[["name", "chainId", "networkId", "nativeCurrency","rpc"]]
+df = df[["name", "chainId", "networkId", "nativeCurrency","rpc", "explorers"]]
+
+
 
 # Extract the symbol from the nativeCurrency object
 df["symbol"] = df["nativeCurrency"].apply(lambda x: x["symbol"])
+
+df["url"] = df["explorers"].apply(lambda x: x[0]["url"] if isinstance(x, list) and len(x) > 0 else None)
 
 # Extract the first RPC endpoint from the rpc list, if it exists
 df["rpcs"] = df["rpc"].apply(lambda x: x[0] if len(x) > 0 else None)
 
 # Select only the columns for chain, chainId, symbol, and rpcs
-df = df[["name", "chainId", "networkId", "symbol", "rpcs"]]
+df = df[["name", "chainId", "networkId", "symbol", "rpcs","url"]]
 
 # Rename columns to match your expected format
-df.columns = ["chain", "chainId", "networkId", "symbol", "rpc"]
+df.columns = ["chain", "chainId", "networkId", "symbol", "rpc","url"]
 
 # Print the resulting DataFrame
 print(df)
