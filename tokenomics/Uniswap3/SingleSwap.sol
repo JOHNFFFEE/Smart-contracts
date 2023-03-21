@@ -1,6 +1,6 @@
 /*
 * The contract addresses are for Goerli
-*  2 functions to create a swap - 
+*  2 functions to create a swap - from one currency to another one 
 * SingleSwap - given a specific amount to change ERC20 tokens
 * swapExactOutputSingle - based on the ammount you want to receive , how much are you willing to spend
 */
