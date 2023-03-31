@@ -1,0 +1,35 @@
+//if you want to retrieve all the ERC721 tokenIds of a user add
+
+1. import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+2. 
+//call the IERC721 and the function we will use
+abstract contract Myerc721 is IERC721{
+      function balanceOf(address who) external virtual view returns (uint256);
+     function totalSupply() external virtual view returns (uint256);
+     function ownerOf(uint256 tokenId) public view virtual override returns (address) ;
+    function tokenURI(uint256 tokenId) external virtual view returns (string memory);
+}
+
+
+3. write this function  
+//color card is  Myerc721 public immutable colourCards
+function walletOfOwnerColors(address _owner)
+    public
+    view
+    returns (uint256[] memory)
+  {
+    uint256 ownerTokenCount = colourCards.balanceOf(_owner);
+
+    uint256[] memory tokenIds = new uint256[](ownerTokenCount);
+    uint256 tokenIndex = 0;
+
+    for (uint256 i = 0; i < colourCards.totalSupply(); i++) {
+      if (_owner == colourCards.ownerOf(i)) {
+        tokenIds[tokenIndex] = i;
+        tokenIndex++;
+      }
+    }
+
+    return tokenIds;
+  }

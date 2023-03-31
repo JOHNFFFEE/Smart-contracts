@@ -1,9 +1,11 @@
+
+
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.17;
 
 
-import"@openzeppelin/contracts/utils/math/SafeMath.sol";
 import"./Crowdsale.sol";
+import"@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
@@ -11,7 +13,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @title IndividuallyCappedCrowdsale
  * @dev Crowdsale with per-user caps.
  */
-contract IndividuallyCappedCrowdsale is Crowdsale, Ownable {
+abstract contract IndividuallyCappedCrowdsale is Crowdsale, Ownable {
   using SafeMath for uint256;
 
   mapping(address => uint256) public contributions;
@@ -31,8 +33,8 @@ contract IndividuallyCappedCrowdsale is Crowdsale, Ownable {
    * @param _beneficiaries List of addresses to be capped
    * @param _cap Wei limit for individual contribution
    */
-  function setGroupCap(
-    address[] _beneficiaries,
+  function setGroupCap( 
+    address[] memory _beneficiaries,
     uint256 _cap
   )
     external
@@ -72,7 +74,7 @@ contract IndividuallyCappedCrowdsale is Crowdsale, Ownable {
     address _beneficiary,
     uint256 _weiAmount
   )
-    internal
+    internal virtual override 
   {
     super._preValidatePurchase(_beneficiary, _weiAmount);
     require(contributions[_beneficiary].add(_weiAmount) <= caps[_beneficiary]);
@@ -87,7 +89,7 @@ contract IndividuallyCappedCrowdsale is Crowdsale, Ownable {
     address _beneficiary,
     uint256 _weiAmount
   )
-    internal
+    internal virtual override
   {
     super._updatePurchasingState(_beneficiary, _weiAmount);
     contributions[_beneficiary] = contributions[_beneficiary].add(_weiAmount);
