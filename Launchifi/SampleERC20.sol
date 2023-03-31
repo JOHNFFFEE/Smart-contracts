@@ -1,13 +1,14 @@
 
+/* @author LAx
+*    __         ______     __  __     __   __     ______     __  __     __     ______   __    
+*  /\\ \\       /\\  __ \\   /\\ \\/\\ \\   /\\ "-.\\ \\   /\\  ___\\   /\\ \\_\\ \\   /\\ \\   /\\  ___\\ /\\ \\   
+* \\ \\ \\____  \\ \\  __ \\  \\ \\ \\_\\ \\  \\ \\ \\-.  \\  \\ \\ \\____  \\ \\  __ \\  \\ \\ \\  \\ \\  __\\ \\ \\ \\  
+*   \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\\\"\\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\  \\ \\_\\    \\ \\_\\ 
+*    \\/_____/   \\/_/\\/_/   \\/_____/   \\/_/ \\/_/   \\/_____/   \\/_/\\/_/   \\/_/   \\/_/     \\/_/ 
+*
+*/
+
 // SPDX-License-Identifier: MIT
-
-
-//   __         ______     __  __     __   __     ______     __  __     __     ______   __    
-//  /\ \       /\  __ \   /\ \/\ \   /\ "-.\ \   /\  ___\   /\ \_\ \   /\ \   /\  ___\ /\ \   
-//  \ \ \____  \ \  __ \  \ \ \_\ \  \ \ \-.  \  \ \ \____  \ \  __ \  \ \ \  \ \  __\ \ \ \  
-//   \ \_____\  \ \_\ \_\  \ \_____\  \ \_\\"\_\  \ \_____\  \ \_\ \_\  \ \_\  \ \_\    \ \_\ 
-//    \/_____/   \/_/\/_/   \/_____/   \/_/ \/_/   \/_____/   \/_/\/_/   \/_/   \/_/     \/_/ 
-
 pragma solidity ^0.8.10;
 
  import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";   
@@ -22,11 +23,12 @@ pragma solidity ^0.8.10;
             _mint(msg.sender,1000*10**decimals())  ;
          }     
 
-     
+        /// @dev only the owner can pause to allow the minting
           function pause() public onlyOwner {
         _pause();
     }
 
+    /// @dev only the owner can unpause to allow the minting
     function unpause() public onlyOwner {
         _unpause();
     }
@@ -39,7 +41,10 @@ pragma solidity ^0.8.10;
         super._beforeTokenTransfer(from, to, amount);
     }
     
-
+    /// @notice Mint function
+    /// @dev only the owner can mint
+    /// @param to  user Address to mint tokens
+    /// @param amount the amount of tokens to mint
     function mint(address to, uint256 amount) public onlyOwner{
         _mint(to, amount);
     }
@@ -49,11 +54,16 @@ pragma solidity ^0.8.10;
         super._mint(account, amount);
     }
  
-
+    /// @dev Returns the number of decimals used to get its user representation
+    /// @return value of 'decimals'
     function decimals() public view virtual override returns (uint8) {
         return 6;
     }
 
+    /// @notice airdrop function to airdrop same amont of tokens to addresses
+    /// @dev only owner function
+    /// @param add  array of addresses
+    /// @param amount the amount of tokens to airdrop users
     function airdrop(  address[] memory add, uint256 amount) onlyOwner external {
     for (uint i=0 ; i< add.length; i++) 
     {
@@ -61,9 +71,9 @@ pragma solidity ^0.8.10;
     }
     }    
    
-    /**
-    * @dev withdraw ether from contract.
-    */  function withdraw() public payable onlyOwner {
+    /// @notice withdraw ether from contract.
+    /// @dev only owner function
+     function withdraw() public payable onlyOwner {
     (bool os, ) = payable(owner()).call{value: address(this).balance}("");
     require(os);
   } 

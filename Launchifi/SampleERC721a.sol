@@ -183,16 +183,16 @@
             }
 
       
-            function transferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {
+            function transferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
             super.transferFrom(from, to, tokenId);
             }
 
-            function safeTransferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {
+            function safeTransferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
             super.safeTransferFrom(from, to, tokenId);
             }
 
             function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
-            public 
+            public payable
             override
             onlyAllowedOperator(from)
             {
